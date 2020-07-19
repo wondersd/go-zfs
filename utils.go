@@ -92,7 +92,10 @@ func setUint(field *uint64, value string) error {
 	return nil
 }
 
-func (ds *Dataset) parseLine(line []string) error {
+/*
+ * parse lines from `zfs list`
+ */
+func (ds *Dataset) parseListLine(line []string) error {
 	var err error
 
 	if len(line) != len(dsPropList) {

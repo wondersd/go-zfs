@@ -153,7 +153,7 @@ func GetDataset(name string) (*Dataset, error) {
 
 	ds := &Dataset{Name: name}
 	for _, line := range out {
-		if err := ds.parseLine(line); err != nil {
+		if err := ds.parseListLine(line); err != nil {
 			return nil, err
 		}
 	}
@@ -428,7 +428,7 @@ func (d *Dataset) Children(depth uint64) ([]*Dataset, error) {
 			ds = &Dataset{Name: name}
 			datasets = append(datasets, ds)
 		}
-		if err := ds.parseLine(line); err != nil {
+		if err := ds.parseListLine(line); err != nil {
 			return nil, err
 		}
 	}
