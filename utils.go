@@ -93,7 +93,8 @@ func setUint(field *uint64, value string) error {
 }
 
 /*
- * parse lines from `zfs list`
+ * parse lines from `zfs list -Hp ...`
+ * outputs space separated values
  */
 func (ds *Dataset) parseListLine(line []string) error {
 	var err error
@@ -136,6 +137,57 @@ func (ds *Dataset) parseListLine(line []string) error {
 		return err
 	}
 	if err = setUint(&ds.Usedbydataset, line[12]); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+/*
+ * parse lines from `zfs get -Hp -o value ...`
+ * outputs line separated values
+ */
+func (ds *Dataset) parseGetLines(line [][]string) error {
+	var err error
+
+	if len(line) != len(dsPropList) {
+		return errors.New("Output does not match what is expected on this platform")
+	}
+	setString(&ds.Name, line[0][0])
+	setString(&ds.Origin, line[1][0])
+
+	if err = setUint(&ds.Used, line[2][0]); err != nil {
+		return err
+	}
+	if err = setUint(&ds.Avail, line[3][0]); err != nil {
+		return err
+	}
+
+	setString(&ds.Mountpoint, line[4][0])
+	setString(&ds.Compression, line[5][0])
+	setString(&ds.Type, line[6][0])
+
+	if err = setUint(&ds.Volsize, line[7][0]); err != nil {
+		return err
+	}
+	if err = setUint(&ds.Quota, line[8][0]); err != nil {
+		return err
+	}
+	if err = setUint(&ds.Referenced, line[9][0]); err != nil {
+		return err
+	}
+
+	if runtime.GOOS == "solaris" {
+		return nil
+	}
+
+	if err = setUint(&ds.Written, line[10][0]); err != nil {
+		return err
+	}
+	if err = setUint(&ds.Logicalused, line[11][0]); err != nil {
+		return err
+	}
+	if err = setUint(&ds.Usedbydataset, line[12][0]); err != nil {
 		return err
 	}
 
@@ -308,7 +360,7 @@ func listByType(t, filter string) ([]*Dataset, error) {
 			ds = &Dataset{Name: name}
 			datasets = append(datasets, ds)
 		}
-		if err := ds.parseLine(line); err != nil {
+		if err := ds.parseListLine(line); err != nil {
 			return nil, err
 		}
 	}

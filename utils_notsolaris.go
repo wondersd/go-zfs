@@ -15,3 +15,19 @@ var dsPropListOptions = strings.Join(dsPropList, ",")
 var zpoolPropList = []string{"name", "health", "allocated", "size", "free", "readonly", "dedupratio", "fragmentation", "freeing", "leaked"}
 var zpoolPropListOptions = strings.Join(zpoolPropList, ",")
 var zpoolArgs = []string{"get", "-p", zpoolPropListOptions}
+
+func getDataset(name string) (*Dataset, error) {
+	out, err := zfs("list", "-Hp", "-o", dsPropListOptions, name)
+	if err != nil {
+		return nil, err
+	}
+
+	ds := &Dataset{Name: name}
+	for _, line := range out {
+		if err := ds.parseListLine(line); err != nil {
+			return nil, err
+		}
+	}
+
+	return ds, nil
+}

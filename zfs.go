@@ -146,19 +146,7 @@ func Volumes(filter string) ([]*Dataset, error) {
 // GetDataset retrieves a single ZFS dataset by name.  This dataset could be
 // any valid ZFS dataset type, such as a clone, filesystem, snapshot, or volume.
 func GetDataset(name string) (*Dataset, error) {
-	out, err := zfs("list", "-Hp", "-o", dsPropListOptions, name)
-	if err != nil {
-		return nil, err
-	}
-
-	ds := &Dataset{Name: name}
-	for _, line := range out {
-		if err := ds.parseListLine(line); err != nil {
-			return nil, err
-		}
-	}
-
-	return ds, nil
+	return getDataset(name);
 }
 
 // Clone clones a ZFS snapshot and returns a clone dataset.
